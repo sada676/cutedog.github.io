@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pet Paradise - Home</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f2f2;
+    }
+    header {
+      background: #3c8d7e;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    nav {
+      background: #2c6e63;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    nav button {
+      background: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      margin: 0.25rem;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .auth-buttons {
+      text-align: right;
+      margin: 1rem;
+    }
+    .auth-buttons button {
+      margin-left: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #3c8d7e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .product {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .product img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .product h3 {
+      margin: 0.5rem 0;
+    }
+    .product p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .product button {
+      background-color: #3c8d7e;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+    }
+    .cart-summary, .payment-section, .chat-section, .auth-section {
+      background: white;
+      margin: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .payment-section img {
+      width: 200px;
+      display: block;
+      margin: 1rem auto;
+    }
+    .chat-section textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+    .auth-section input {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Pet Paradise</h1>
+    <p>Find your perfect furry friend</p>
+  </header>
+
+  <div class="auth-buttons">
+    <button onclick="toggleForm('loginForm')">Login</button>
+    <button onclick="toggleForm('signupForm')">Sign Up</button>
+  </div>
+
+  <div class="auth-section" id="loginForm" style="display:none">
+    <h3>Login</h3>
+    <input type="email" placeholder="Email" />
+    <input type="password" placeholder="Password" />
+    <button onclick="alert('Logged in (demo only)')">Login</button>
+  </div>
+  <div class="auth-section" id="signupForm" style="display:none">
+    <h3>Sign Up</h3>
+    <input type="text" placeholder="Full Name" />
+    <input type="email" placeholder="Email" />
+    <input type="password" placeholder="Password" />
+    <button onclick="alert('Account created (demo only)')">Sign Up</button>
+  </div>
+
+  <nav>
+    <button onclick="filterProducts('All')">All</button>
+    <button onclick="filterProducts('Dog')">Dogs</button>
+    <button onclick="filterProducts('Cat')">Cats</button>
+    <button onclick="filterProducts('Rabbit')">Rabbits</button>
+  </nav>
+
+  <div class="products" id="productList"></div>
+
+  <div class="cart-summary" id="cartSummary">
+    <h2>Cart</h2>
+    <ul id="cartItems"></ul>
+    <p><strong>Total:</strong> $<span id="totalPrice">0</span></p>
+  </div>
+
+  <div class="payment-section">
+    <h2>Payment</h2>
+    <p>Please scan the QR code below to pay (ABA/ACLEDA):</p>
+    <img src="u.jpg" alt="QR Code for Payment">
+  </div>
+
+  <div class="chat-section">
+    <h2>Message the Seller</h2>
+    <textarea id="chatBox" placeholder="Type your message here..."></textarea>
+    <button onclick="sendMessage()">Send</button>
+    <div id="chatLog"></div>
+  </div>
+
+  <script>
+    const products = [
+      { name: 'Golden Retriever Puppy', category: 'Dog', price: 500, image: 'https://placedog.net/400/300?id=1' },
+      { name: 'Persian Cat', category: 'Cat', price: 300, image: 'a.jpg' },
+      { name: 'Holland Lop Rabbit', category: 'Rabbit', price: 100, image: 'b.jpg' },
+      { name: 'Bulldog', category: 'Dog', price: 450, image: 'https://placedog.net/400/300?id=2' },
+      { name: 'Siamese Cat', category: 'Cat', price: 250, image: 'boy.jpg' },
+      { name: 'Mini Rex Rabbit', category: 'Rabbit', price: 120, image: 'ko.jpg' },
+    ];
+
+    let cart = [];
+
+    function renderProducts(list) {
+      const container = document.getElementById('productList');
+      container.innerHTML = '';
+      list.forEach((p, index) => {
+        container.innerHTML += `
+          <div class="product">
+            <img src="${p.image}" alt="${p.name}" />
+            <h3>${p.name}</h3>
+            <p>Category: ${p.category}</p>
+            <p>Price: $${p.price}</p>
+            <button onclick="addToCart(${index})">Add to Cart</button>
+          </div>
+        `;
+      });
+    }
+
+    function filterProducts(category) {
+      if (category === 'All') {
+        renderProducts(products);
+      } else {
+        renderProducts(products.filter(p => p.category === category));
+      }
+    }
+
+    function addToCart(index) {
+      cart.push(products[index]);
+      updateCart();
+    }
+
+    function updateCart() {
+      const cartItems = document.getElementById('cartItems');
+      const totalPrice = document.getElementById('totalPrice');
+      cartItems.innerHTML = '';
+      let total = 0;
+      cart.forEach((item, i) => {
+        cartItems.innerHTML += `<li>${item.name} - $${item.price}</li>`;
+        total += item.price;
+      });
+      totalPrice.textContent = total;
+    }
+
+    function toggleForm(id) {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function sendMessage() {
+      const chatBox = document.getElementById('chatBox');
+      const chatLog = document.getElementById('chatLog');
+      const msg = chatBox.value;
+      if (msg.trim()) {
+        chatLog.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+        chatBox.value = '';
+      }
+    }
+
+    renderProducts(products);
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+  
+
+
+
